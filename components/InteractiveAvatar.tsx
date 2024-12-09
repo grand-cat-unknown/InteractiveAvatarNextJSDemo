@@ -91,12 +91,12 @@ export default function InteractiveAvatar() {
     try {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.High,
-        avatarName: "Ann_Doctor_Sitting_public",
+        avatarName: "Ann_Therapist_public",
         knowledgeBase: "My Name is Srikanth. I live in Belgium",
         voice: {
           rate: 1, // 0.5 ~ 1.5
           emotion: VoiceEmotion.FRIENDLY,
-          voiceId:"1a966c7d97c349e19c6d9e74f2f2ea47"
+          voiceId:"e6f941fd57e64b3ba000c53263d6ba28"
         },
         language: 'nl',
         disableIdleTimeout: true,

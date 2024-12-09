@@ -1,0 +1,204 @@
+{
+  "code": 100,
+  "data": [
+    {
+      "avatar_id": "Ann_Doctor_Standing2_public",
+      "created_at": 1732855734,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Ann_Doctor_Sitting_public",
+      "created_at": 1732855721,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Ann_Therapist_public",
+      "created_at": 1732855717,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Shawn_Therapist_public",
+      "created_at": 1732855256,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Bryan_FitnessCoach_public",
+      "created_at": 1732855242,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Bryan_IT_Sitting_public",
+      "created_at": 1732855238,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Dexter_Doctor_Standing2_public",
+      "created_at": 1732855224,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Dexter_Doctor_Sitting2_public",
+      "created_at": 1732855216,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Dexter_Lawyer_Sitting_public",
+      "created_at": 1732855201,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Elenora_IT_Sitting_public",
+      "created_at": 1732855184,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Elenora_FitnessCoach2_public",
+      "created_at": 1732855180,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Elenora_FitnessCoach_public",
+      "created_at": 1732855176,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Doctor_Standing2_public",
+      "created_at": 1732855167,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Doctor_Sitting2_public",
+      "created_at": 1732855158,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Lawyer_Sitting2_public",
+      "created_at": 1732855140,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Teacher_Standing_public",
+      "created_at": 1732855127,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Teacher_Sitting2_public",
+      "created_at": 1732855123,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Judy_Teacher_Sitting_public",
+      "created_at": 1732855119,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "June_HR_public",
+      "created_at": 1732855106,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Silas_CustomerSupport_public",
+      "created_at": 1732855096,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "SilasHR_public",
+      "created_at": 1732855092,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "Wayne_20240711",
+      "created_at": 1727136000,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "ef08039a41354ed5a20565db899373f3",
+      "created_at": 1727049600,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "336b72634e644335ad40bd56462fc780",
+      "created_at": 1726963200,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "37f4d912aa564663a1cf8d63acd0e1ab",
+      "created_at": 1726876800,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "cc2984a6003a4d5194eb58a4ad570337",
+      "created_at": 1726790400,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "eb0a8cc8046f476da551a5559fbb5c82",
+      "created_at": 1726704000,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "fa7b34fe0b294f02b2fca6c1ed2c7158",
+      "created_at": 1726617600,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "3c8a703d9d764938ae522b43401a59c2",
+      "created_at": 1726531200,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "73c84e2b886940099c5793b085150f2f",
+      "created_at": 1726444800,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "c20f4bdddbe041ecba98d93444f8b29b",
+      "created_at": 1726358400,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "43c34c4285cb4b6c81856713c70ba23b",
+      "created_at": 1726272000,
+      "is_public": true,
+      "status": "ACTIVE"
+    },
+    {
+      "avatar_id": "2c57ba04ef4d4a5ca30a953d0791e7e3",
+      "created_at": 1726185600,
+      "is_public": true,
+      "status": "ACTIVE"
+    }
+  ],
+  "message": "Success"
+}
