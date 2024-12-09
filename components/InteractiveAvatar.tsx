@@ -40,6 +40,7 @@ export default function InteractiveAvatar() {
   const avatar = useRef<StreamingAvatar | null>(null);
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
+  const [isStoppingAllSessions, setIsStoppingAllSessions] = useState(false);
 
   async function fetchAccessToken() {
     try {
@@ -179,6 +180,35 @@ export default function InteractiveAvatar() {
     }
   }, [mediaStream, stream]);
 
+  async function stopAllSessions() {
+    setIsStoppingAllSessions(true);
+    try {
+      // First get all active sessions
+      const sessionsResponse = await fetch("/api/list-sessions");
+      const sessionsData = await sessionsResponse.json();
+      console.log("Active sessions:", sessionsData);
+
+      // Make sure we have the correct data structure
+      const sessions = sessionsData?.data?.sessions || [];
+      for (const session of sessions) {
+        const closeResponse = await fetch("/api/close-session", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sessionId: session.session_id }),
+        });
+        const closeData = await closeResponse.json();
+        console.log(`Session ${session.session_id} closed:`, closeData);
+      }
+    } catch (error) {
+      console.error("Error stopping all sessions:", error);
+      setDebug("Failed to stop all sessions");
+    } finally {
+      setIsStoppingAllSessions(false);
+    }
+  }
+
   return (
     <div className="w-full flex flex-col gap-4">
       <Card>
@@ -274,6 +304,15 @@ export default function InteractiveAvatar() {
                 onClick={startSession}
               >
                 Start session
+              </Button>
+              <Button
+                className="bg-gradient-to-tr from-red-500 to-red-300 w-full text-white"
+                size="md"
+                variant="shadow"
+                onClick={stopAllSessions}
+                isLoading={isStoppingAllSessions}
+              >
+                Stop All Active Sessions
               </Button>
             </div>
           ) : (
