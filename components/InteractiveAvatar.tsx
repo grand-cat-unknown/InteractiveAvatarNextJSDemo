@@ -213,9 +213,9 @@ export default function InteractiveAvatar() {
     setIsLoadingRepeat(false);
   };
 
-  const requestMicrophonePermission = async () => {
+  async function requestMicrophonePermission() {
     try {
-      // First check if we're in a secure context (https or localhost)
+      // Ensure the context is secure
       if (!window.isSecureContext) {
         setDebug('Microphone access requires a secure context (HTTPS or localhost)');
         return false;
@@ -246,7 +246,7 @@ export default function InteractiveAvatar() {
         }
       });
 
-      // If we got here, permission was granted. Stop the temporary stream.
+      // Stop the temporary stream if permission was granted
       stream.getTracks().forEach(track => track.stop());
       return true;
     } catch (error) {
@@ -258,7 +258,7 @@ export default function InteractiveAvatar() {
       }
       return false;
     }
-  };
+  }
 
   const startRecording = async () => {
     try {
