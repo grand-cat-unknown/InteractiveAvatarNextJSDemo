@@ -1,5 +1,5 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
-import { AssemblyAI, RealtimeTranscript } from 'assemblyai';
+import { AssemblyAI, RealtimeTranscriber, RealtimeTranscript } from 'assemblyai';
 import { debounce } from 'lodash';
 
 import StreamingAvatar, {
@@ -28,6 +28,11 @@ import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 import {AVATARS, STT_LANGUAGE_LIST} from "@/app/lib/constants";
 import { AVATAR_KNOWLEDGE_BASE } from "@/app/lib/knowledge-base";
 import { SYSTEM_PROMPT } from "@/app/lib/system-prompt";
+
+interface SessionOpenEvent {
+  sessionId: string;
+}
+
 export default function InteractiveAvatar() {
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
@@ -182,25 +187,36 @@ export default function InteractiveAvatar() {
     setIsTranscribing(false);
   }, [transcriber]);
 
+  async function getAssemblyAITempToken() {
+    try {
+      const response = await fetch("/api/get-assemblyai-token");
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error("Error getting AssemblyAI temporary token:", error);
+      setDebug("Failed to get transcription token");
+      return null;
+    }
+  }
+
   const initializeTranscriber = async () => {
-    if (!process.env.NEXT_PUBLIC_ASSEMBLYAI_API_KEY) {
-      setDebug("AssemblyAI API key not found");
+    const tempToken = await getAssemblyAITempToken();
+    if (!tempToken) {
+      setDebug("Could not get transcription token");
       return null;
     }
 
     const client = new AssemblyAI({
-      apiKey: process.env.NEXT_PUBLIC_ASSEMBLYAI_API_KEY || ''
+      apiKey: tempToken // Use the temporary token here
     });
 
-    const SAMPLE_RATE = 16000;
-
     const newTranscriber = client.realtime.transcriber({
-      sampleRate: SAMPLE_RATE,
+      sampleRate: 16000,
       disablePartialTranscripts: true
     });
 
-    newTranscriber.on('open', ({ sessionId }) => {
-      console.log(`Session opened with ID: ${sessionId}`);
+    newTranscriber.on('open', (event: SessionOpenEvent) => {
+      console.log(`Session opened with ID: ${event.sessionId}`);
       setIsTranscribing(true);
     });
 
