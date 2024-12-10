@@ -1,5 +1,6 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
 import { AssemblyAI, RealtimeTranscript } from 'assemblyai';
+import { debounce } from 'lodash';
 
 import StreamingAvatar, {
   AvatarQuality,
@@ -19,7 +20,7 @@ import {
   Tabs,
   Tab,
 } from "@nextui-org/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { useMemoizedFn, usePrevious } from "ahooks";
 
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
@@ -45,6 +46,12 @@ export default function InteractiveAvatar() {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [transcribedText, setTranscribedText] = useState('');
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const [videoError, setVideoError] = useState<string>('');
+
+  const debouncedSetTranscribedText = useMemo(
+    () => debounce((text: string) => setTranscribedText(text), 150),
+    []
+  );
 
   async function fetchAccessToken() {
     try {
@@ -131,32 +138,39 @@ export default function InteractiveAvatar() {
       setIsLoadingSession(false);
     }
   }
-  async function handleSpeak() {
+  const handleSpeak = useCallback(async () => {
     setIsLoadingRepeat(true);
     if (!avatar.current) {
       setDebug("Avatar API not initialized");
-
       return;
     }
-    // speak({ text: text, task_type: TaskType.REPEAT })
-    await avatar.current.speak({ text: text, taskType: TaskType.TALK, taskMode: TaskMode.SYNC }).catch((e) => {
+    
+    try {
+      await avatar.current.speak({ 
+        text: text, 
+        taskType: TaskType.TALK, 
+        taskMode: TaskMode.SYNC 
+      });
+    } catch (e: any) {
       setDebug(e.message);
-    });
+    }
     setIsLoadingRepeat(false);
-  }
-  async function handleInterrupt() {
+  }, [text]);
+
+  const handleInterrupt = useCallback(async () => {
     if (!avatar.current) {
       setDebug("Avatar API not initialized");
-
       return;
     }
-    await avatar.current
-      .interrupt()
-      .catch((e) => {
-        setDebug(e.message);
-      });
-  }
-  async function endSession() {
+    
+    try {
+      await avatar.current.interrupt();
+    } catch (e: any) {
+      setDebug(e.message);
+    }
+  }, []);
+
+  const endSession = useCallback(async () => {
     if (transcriber) {
       await transcriber.close();
       setTranscriber(null);
@@ -165,7 +179,7 @@ export default function InteractiveAvatar() {
     await avatar.current?.stopAvatar();
     setStream(undefined);
     setIsTranscribing(false);
-  }
+  }, [transcriber]);
 
   const initializeTranscriber = async () => {
     if (!process.env.NEXT_PUBLIC_ASSEMBLYAI_API_KEY) {
@@ -200,7 +214,7 @@ export default function InteractiveAvatar() {
 
     newTranscriber.on('transcript', (transcript: RealtimeTranscript) => {
       if (transcript.text) {
-        setTranscribedText(transcript.text);
+        debouncedSetTranscribedText(transcript.text);
         if (transcript.message_type === 'FinalTranscript') {
           console.log('Sending transcribed text to avatar');
           handleTranscribedText(transcript.text);
@@ -377,6 +391,15 @@ export default function InteractiveAvatar() {
         setDebug("Playing");
       };
     }
+
+    // Cleanup function
+    return () => {
+      if (mediaStream.current) {
+        const tracks = mediaStream.current.srcObject as MediaStream;
+        tracks?.getTracks().forEach(track => track.stop());
+        mediaStream.current.srcObject = null;
+      }
+    };
   }, [mediaStream, stream]);
 
   async function stopAllSessions() {
@@ -439,6 +462,10 @@ export default function InteractiveAvatar() {
                 ref={mediaStream}
                 autoPlay
                 playsInline
+                onError={(e) => {
+                  console.error('Video error:', e);
+                  setVideoError('Failed to load video stream');
+                }}
                 style={{
                   width: "100%",
                   height: "100%",
@@ -447,6 +474,11 @@ export default function InteractiveAvatar() {
               >
                 <track kind="captions" />
               </video>
+              {videoError && (
+                <div className="text-red-500 text-sm mt-2">
+                  {videoError}
+                </div>
+              )}
               <div className="flex flex-col gap-2 absolute bottom-3 right-3">
                 <Button
                   className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white rounded-lg"
