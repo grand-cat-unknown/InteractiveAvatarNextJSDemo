@@ -26,6 +26,7 @@ import { useMemoizedFn, usePrevious } from "ahooks";
 import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 
 import {AVATARS, STT_LANGUAGE_LIST} from "@/app/lib/constants";
+import { AVATAR_KNOWLEDGE_BASE } from "@/app/lib/knowledge-base";
 
 export default function InteractiveAvatar() {
   const [isLoadingSession, setIsLoadingSession] = useState(false);
@@ -103,7 +104,7 @@ export default function InteractiveAvatar() {
       const res = await avatar.current.createStartAvatar({
         quality: AvatarQuality.Low,
         avatarName: "Elenora_IT_Sitting_public",
-        knowledgeBase: "My Name is Srikanth. I live in Belgium",
+        knowledgeBase: AVATAR_KNOWLEDGE_BASE,
         voice: {
           rate: 1.12, // 0.5 ~ 1.5
           emotion: VoiceEmotion.SERIOUS,
