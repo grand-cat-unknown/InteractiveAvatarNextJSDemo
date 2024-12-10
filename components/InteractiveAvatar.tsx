@@ -150,33 +150,24 @@ export default function InteractiveAvatar() {
   }
 
   const initializeTranscriber = async () => {
-    if (!process.env.ASSEMBLYAI_API_KEY) {
+    if (!process.env.NEXT_PUBLIC_ASSEMBLYAI_API_KEY) {
       setDebug("AssemblyAI API key not found");
       return null;
     }
 
     const client = new AssemblyAI({
-      apiKey: process.env.ASSEMBLYAI_API_KEY || ''
+      apiKey: process.env.NEXT_PUBLIC_ASSEMBLYAI_API_KEY || ''
     });
+
+    const SAMPLE_RATE = 16000;
 
     const newTranscriber = client.realtime.transcriber({
-      sampleRate: 16000
+      sampleRate: SAMPLE_RATE
     });
 
-    newTranscriber.on('open', () => {
-      console.log('AssemblyAI WebSocket opened');
+    newTranscriber.on('open', ({ sessionId }) => {
+      console.log(`Session opened with ID: ${sessionId}`);
       setIsTranscribing(true);
-    });
-
-    newTranscriber.on('transcript', (transcript: RealtimeTranscript) => {
-      if (transcript.text) {
-        setTranscribedText(transcript.text);
-        if (transcript.message_type === 'FinalTranscript') {
-          console.log('Sending transcribed text to avatar');
-          console.log(transcript.text);
-          handleTranscribedText(transcript.text);
-        }
-      }
     });
 
     newTranscriber.on('error', (error: Error) => {
@@ -184,12 +175,23 @@ export default function InteractiveAvatar() {
       setDebug(`Transcription error: ${error.message}`);
     });
 
-    newTranscriber.on('close', () => {
-      console.log('AssemblyAI WebSocket closed');
+    newTranscriber.on('close', (code: number, reason: string) => {
+      console.log('AssemblyAI WebSocket closed:', code, reason);
       setIsTranscribing(false);
     });
 
+    newTranscriber.on('transcript', (transcript: RealtimeTranscript) => {
+      if (transcript.text) {
+        setTranscribedText(transcript.text);
+        if (transcript.message_type === 'FinalTranscript') {
+          console.log('Sending transcribed text to avatar');
+          handleTranscribedText(transcript.text);
+        }
+      }
+    });
+
     try {
+      console.log('Connecting to real-time transcript service');
       await newTranscriber.connect();
       return newTranscriber;
     } catch (error) {
