@@ -95,13 +95,13 @@ export default function InteractiveAvatar() {
     });
     try {
       const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.High,
-        avatarName: "Ann_Therapist_public",
+        quality: AvatarQuality.Low,
+        avatarName: "Elenora_IT_Sitting_public",
         knowledgeBase: "My Name is Srikanth. I live in Belgium",
         voice: {
-          rate: 1, // 0.5 ~ 1.5
-          emotion: VoiceEmotion.FRIENDLY,
-          voiceId:"cc29d03937d14240acf109c827a9a51a"
+          rate: 1.12, // 0.5 ~ 1.5
+          emotion: VoiceEmotion.SERIOUS,
+          voiceId:"1bd001e7e50f421d891986aad5158bc8"
         },
         language: 'en',
         disableIdleTimeout: true,
