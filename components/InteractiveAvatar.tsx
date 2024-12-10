@@ -31,7 +31,6 @@ export default function InteractiveAvatar() {
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
   const [stream, setStream] = useState<MediaStream>();
   const [debug, setDebug] = useState<string>();
-  const [knowledgeId, setKnowledgeId] = useState<string>("");
   const [avatarId, setAvatarId] = useState<string>("");
   const [language, setLanguage] = useState<string>('en');
 
@@ -450,55 +449,6 @@ export default function InteractiveAvatar() {
             </div>
           ) : !isLoadingSession ? (
             <div className="h-full justify-center items-center flex flex-col gap-8 w-[500px] self-center">
-              <div className="flex flex-col gap-2 w-full">
-                <p className="text-sm font-medium leading-none">
-                  Custom Knowledge ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom knowledge ID"
-                  value={knowledgeId}
-                  onChange={(e) => setKnowledgeId(e.target.value)}
-                />
-                <p className="text-sm font-medium leading-none">
-                  Custom Avatar ID (optional)
-                </p>
-                <Input
-                  placeholder="Enter a custom avatar ID"
-                  value={avatarId}
-                  onChange={(e) => setAvatarId(e.target.value)}
-                />
-                <Select
-                  placeholder="Or select one from these example avatars"
-                  size="md"
-                  onChange={(e) => {
-                    setAvatarId(e.target.value);
-                  }}
-                >
-                  {AVATARS.map((avatar) => (
-                    <SelectItem
-                      key={avatar.avatar_id}
-                      textValue={avatar.avatar_id}
-                    >
-                      {avatar.name}
-                    </SelectItem>
-                  ))}
-                </Select>
-                <Select
-                  label="Select language"
-                  placeholder="Select language"
-                  className="max-w-xs"
-                  selectedKeys={[language]}
-                  onChange={(e) => {
-                    setLanguage(e.target.value);
-                  }}
-                >
-                  {STT_LANGUAGE_LIST.map((lang) => (
-                    <SelectItem key={lang.key}>
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </Select>
-              </div>
               <Button
                 className="bg-gradient-to-tr from-indigo-500 to-indigo-300 w-full text-white"
                 size="md"
