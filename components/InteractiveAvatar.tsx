@@ -1,4 +1,5 @@
 import type { StartAvatarResponse } from "@heygen/streaming-avatar";
+import { AssemblyAI, RealtimeTranscript } from 'assemblyai';
 
 import StreamingAvatar, {
   AvatarQuality,
@@ -41,6 +42,10 @@ export default function InteractiveAvatar() {
   const [chatMode, setChatMode] = useState("text_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [isStoppingAllSessions, setIsStoppingAllSessions] = useState(false);
+  const [transcriber, setTranscriber] = useState<any>(null);
+  const [isTranscribing, setIsTranscribing] = useState(false);
+  const [transcribedText, setTranscribedText] = useState('');
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
   async function fetchAccessToken() {
     try {
@@ -144,13 +149,180 @@ export default function InteractiveAvatar() {
     setStream(undefined);
   }
 
+  const initializeTranscriber = async () => {
+    if (!process.env.ASSEMBLYAI_API_KEY) {
+      setDebug("AssemblyAI API key not found");
+      return null;
+    }
+
+    const client = new AssemblyAI({
+      apiKey: process.env.ASSEMBLYAI_API_KEY || ''
+    });
+
+    const newTranscriber = client.realtime.transcriber({
+      sampleRate: 16000
+    });
+
+    newTranscriber.on('open', () => {
+      console.log('AssemblyAI WebSocket opened');
+      setIsTranscribing(true);
+    });
+
+    newTranscriber.on('transcript', (transcript: RealtimeTranscript) => {
+      if (transcript.text) {
+        setTranscribedText(transcript.text);
+        if (transcript.message_type === 'FinalTranscript') {
+          handleTranscribedText(transcript.text);
+        }
+      }
+    });
+
+    newTranscriber.on('error', (error: Error) => {
+      console.error('AssemblyAI error:', error);
+      setDebug(`Transcription error: ${error.message}`);
+    });
+
+    newTranscriber.on('close', () => {
+      console.log('AssemblyAI WebSocket closed');
+      setIsTranscribing(false);
+    });
+
+    try {
+      await newTranscriber.connect();
+      return newTranscriber;
+    } catch (error) {
+      console.error('Failed to connect to AssemblyAI:', error);
+      setDebug('Failed to connect to transcription service');
+      return null;
+    }
+  };
+
+  const handleTranscribedText = async (text: string) => {
+    if (!avatar.current) return;
+    
+    setIsLoadingRepeat(true);
+    try {
+      await avatar.current.speak({ 
+        text: text, 
+        taskType: TaskType.TALK, 
+        taskMode: TaskMode.SYNC 
+      });
+    } catch (e: any) {
+      setDebug(e.message);
+    }
+    setIsLoadingRepeat(false);
+  };
+
+  const requestMicrophonePermission = async () => {
+    try {
+      // First check if we're in a secure context (https or localhost)
+      if (!window.isSecureContext) {
+        setDebug('Microphone access requires a secure context (HTTPS or localhost)');
+        return false;
+      }
+
+      // Check if the browser supports getUserMedia
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setDebug('Your browser does not support microphone access');
+        return false;
+      }
+
+      // Check current permission status
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName });
+      console.log('Microphone permission status:', permissionStatus.state);
+
+      // If already denied, show a message
+      if (permissionStatus.state === 'denied') {
+        setDebug('Microphone access is blocked. Please allow it in your browser settings.');
+        return false;
+      }
+
+      // Request permission by attempting to get the stream
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 16000
+        }
+      });
+
+      // If we got here, permission was granted. Stop the temporary stream.
+      stream.getTracks().forEach(track => track.stop());
+      return true;
+    } catch (error) {
+      console.error('Microphone permission error:', error);
+      if ((error as Error).name === 'NotAllowedError') {
+        setDebug('Microphone access was denied. Please allow it in your browser settings and try again.');
+      } else {
+        setDebug(`Microphone error: ${(error as Error).message}`);
+      }
+      return false;
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) {
+        return false;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          sampleRate: 16000
+        }
+      });
+
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm'
+      });
+      
+      mediaRecorderRef.current = mediaRecorder;
+
+      mediaRecorder.ondataavailable = async (event) => {
+        if (event.data.size > 0 && transcriber) {
+          const arrayBuffer = await event.data.arrayBuffer();
+          const int16Array = new Int16Array(arrayBuffer);
+          transcriber.stream().write(int16Array);
+        }
+      };
+
+      mediaRecorder.start(100);
+      return true;
+    } catch (error) {
+      console.error('Error starting recording:', error);
+      setDebug('Error starting recording: ' + (error as Error).message);
+      return false;
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current) {
+      mediaRecorderRef.current.stop();
+      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      mediaRecorderRef.current = null;
+    }
+  };
+
   const handleChangeChatMode = useMemoizedFn(async (v) => {
     if (v === chatMode) {
       return;
     }
     if (v === "text_mode") {
       avatar.current?.closeVoiceChat();
+      if (transcriber) {
+        await transcriber.close();
+        setTranscriber(null);
+      }
+      stopRecording();
     } else {
+      // Check for microphone permission before switching to voice mode
+      const hasPermission = await requestMicrophonePermission();
+      if (!hasPermission) {
+        return;
+      }
       await avatar.current?.startVoiceChat();
     }
     setChatMode(v);
@@ -168,6 +340,10 @@ export default function InteractiveAvatar() {
   useEffect(() => {
     return () => {
       endSession();
+      if (transcriber) {
+        transcriber.close();
+      }
+      stopRecording();
     };
   }, []);
 
@@ -209,6 +385,27 @@ export default function InteractiveAvatar() {
       setIsStoppingAllSessions(false);
     }
   }
+
+  const toggleVoiceMode = async () => {
+    if (isTranscribing) {
+      if (transcriber) {
+        await transcriber.close();
+        setTranscriber(null);
+      }
+      stopRecording();
+      setIsTranscribing(false);
+    } else {
+      const newTranscriber = await initializeTranscriber();
+      if (newTranscriber) {
+        const started = await startRecording();
+        if (started) {
+          setTranscriber(newTranscriber);
+        } else {
+          await newTranscriber.close();
+        }
+      }
+    }
+  };
 
   return (
     <div className="w-full flex flex-col gap-4">
@@ -348,15 +545,21 @@ export default function InteractiveAvatar() {
               )}
             </div>
           ) : (
-            <div className="w-full text-center">
+            <div className="w-full text-center flex flex-col gap-2">
               <Button
-                isDisabled={!isUserTalking}
                 className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
                 size="md"
                 variant="shadow"
+                onClick={toggleVoiceMode}
+                isDisabled={!stream}
               >
-                {isUserTalking ? "Listening" : "Voice chat"}
+                {isTranscribing ? "Stop Listening" : "Start Listening"}
               </Button>
+              {transcribedText && (
+                <p className="text-sm text-gray-600">
+                  {transcribedText}
+                </p>
+              )}
             </div>
           )}
         </CardFooter>
