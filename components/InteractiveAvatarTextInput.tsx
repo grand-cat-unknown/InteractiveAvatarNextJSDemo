@@ -72,6 +72,10 @@ export default function InteractiveAvatarTextInput({
       }}
       onValueChange={setInput}
       isDisabled={disabled}
+      classNames={{
+        input: "bg-gray-800 text-white",
+        label: "text-gray-300",
+      }}
     />
   );
 }
