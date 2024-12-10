@@ -38,7 +38,7 @@ export default function InteractiveAvatar() {
   const [text, setText] = useState<string>("");
   const mediaStream = useRef<HTMLVideoElement>(null);
   const avatar = useRef<StreamingAvatar | null>(null);
-  const [chatMode, setChatMode] = useState("text_mode");
+  const [chatMode, setChatMode] = useState("voice_mode");
   const [isUserTalking, setIsUserTalking] = useState(false);
   const [isStoppingAllSessions, setIsStoppingAllSessions] = useState(false);
   const [transcriber, setTranscriber] = useState<any>(null);
@@ -107,11 +107,24 @@ export default function InteractiveAvatar() {
       });
 
       setData(res);
-      // default to voice mode
+      
+      // Initialize voice mode components right after avatar creation
       await avatar.current?.startVoiceChat({
         useSilencePrompt: false
       });
-      setChatMode("voice_mode");
+      
+      // Initialize transcriber right away
+      const newTranscriber = await initializeTranscriber();
+      if (newTranscriber) {
+        const started = await startRecording();
+        if (started) {
+          setTranscriber(newTranscriber);
+          setIsTranscribing(true);
+        } else {
+          await newTranscriber.close();
+        }
+      }
+
     } catch (error) {
       console.error("Error starting avatar session:", error);
     } finally {
@@ -473,49 +486,22 @@ export default function InteractiveAvatar() {
         </CardBody>
         <Divider />
         <CardFooter className="flex flex-col gap-3 relative">
-          <Tabs
-            aria-label="Options"
-            selectedKey={chatMode}
-            onSelectionChange={(v) => {
-              handleChangeChatMode(v);
-            }}
-          >
-            <Tab key="text_mode" title="Text mode" />
-            <Tab key="voice_mode" title="Voice mode" />
-          </Tabs>
-          {chatMode === "text_mode" ? (
-            <div className="w-full flex relative">
-              <InteractiveAvatarTextInput
-                disabled={!stream}
-                input={text}
-                label="Chat"
-                loading={isLoadingRepeat}
-                placeholder="Type something for the avatar to respond"
-                setInput={setText}
-                onSubmit={handleSpeak}
-              />
-              {text && (
-                <Chip className="absolute right-16 top-3">Listening</Chip>
-              )}
-            </div>
-          ) : (
-            <div className="w-full text-center flex flex-col gap-2">
-              <Button
-                className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
-                size="md"
-                variant="shadow"
-                onClick={toggleVoiceMode}
-                isDisabled={!stream}
-              >
-                {isTranscribing ? "Stop Listening" : "Start Listening"}
-              </Button>
-              {transcribedText && (
-                <p className="text-sm text-gray-600">
-                  {transcribedText}
-                </p>
-              )}
-            </div>
-          )}
+          <div className="w-full text-center flex flex-col gap-2">
+            <Button
+              className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
+              size="md"
+              variant="shadow"
+              onClick={toggleVoiceMode}
+              isDisabled={!stream}
+            >
+              {isTranscribing ? "Stop Listening" : "Start Listening"}
+            </Button>
+            {transcribedText && (
+              <p className="text-sm text-gray-600">
+                {transcribedText}
+              </p>
+            )}
+          </div>
         </CardFooter>
       </Card>
       <p className="font-mono text-right">
