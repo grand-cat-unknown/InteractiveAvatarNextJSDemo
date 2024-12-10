@@ -157,8 +157,14 @@ export default function InteractiveAvatar() {
       });
   }
   async function endSession() {
+    if (transcriber) {
+      await transcriber.close();
+      setTranscriber(null);
+    }
+    stopRecording();
     await avatar.current?.stopAvatar();
     setStream(undefined);
+    setIsTranscribing(false);
   }
 
   const initializeTranscriber = async () => {
@@ -487,15 +493,6 @@ export default function InteractiveAvatar() {
         <Divider />
         <CardFooter className="flex flex-col gap-3 relative">
           <div className="w-full text-center flex flex-col gap-2">
-            <Button
-              className="bg-gradient-to-tr from-indigo-500 to-indigo-300 text-white"
-              size="md"
-              variant="shadow"
-              onClick={toggleVoiceMode}
-              isDisabled={!stream}
-            >
-              {isTranscribing ? "Stop Listening" : "Start Listening"}
-            </Button>
             {transcribedText && (
               <p className="text-sm text-gray-600">
                 {transcribedText}
