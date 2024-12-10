@@ -27,7 +27,7 @@ import InteractiveAvatarTextInput from "./InteractiveAvatarTextInput";
 
 import {AVATARS, STT_LANGUAGE_LIST} from "@/app/lib/constants";
 import { AVATAR_KNOWLEDGE_BASE } from "@/app/lib/knowledge-base";
-
+import { SYSTEM_PROMPT } from "@/app/lib/system-prompt";
 export default function InteractiveAvatar() {
   const [isLoadingSession, setIsLoadingSession] = useState(false);
   const [isLoadingRepeat, setIsLoadingRepeat] = useState(false);
@@ -102,9 +102,9 @@ export default function InteractiveAvatar() {
     });
     try {
       const res = await avatar.current.createStartAvatar({
-        quality: AvatarQuality.Low,
+        quality: AvatarQuality.Medium,
         avatarName: "Elenora_IT_Sitting_public",
-        knowledgeBase: AVATAR_KNOWLEDGE_BASE,
+        knowledgeBase: "SYSTEM PROMPT: " + SYSTEM_PROMPT +"\n" +AVATAR_KNOWLEDGE_BASE  ,
         voice: {
           rate: 1.0, // 0.5 ~ 1.5
           emotion: VoiceEmotion.SERIOUS,
