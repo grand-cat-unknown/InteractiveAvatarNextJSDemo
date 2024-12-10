@@ -36,3 +36,5 @@ next-env.d.ts
 .idea
 .env
 .env
+public/Data-privacy.txt
+public/System-prompt.txt
