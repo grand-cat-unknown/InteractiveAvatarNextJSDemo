@@ -106,7 +106,7 @@ export default function InteractiveAvatar() {
         avatarName: "Elenora_IT_Sitting_public",
         knowledgeBase: AVATAR_KNOWLEDGE_BASE,
         voice: {
-          rate: 1.12, // 0.5 ~ 1.5
+          rate: 1.0, // 0.5 ~ 1.5
           emotion: VoiceEmotion.SERIOUS,
           voiceId:"1bd001e7e50f421d891986aad5158bc8"
         },
