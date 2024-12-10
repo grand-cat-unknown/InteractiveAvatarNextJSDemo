@@ -195,7 +195,8 @@ export default function InteractiveAvatar() {
     const SAMPLE_RATE = 16000;
 
     const newTranscriber = client.realtime.transcriber({
-      sampleRate: SAMPLE_RATE
+      sampleRate: SAMPLE_RATE,
+      disablePartialTranscripts: true
     });
 
     newTranscriber.on('open', ({ sessionId }) => {
