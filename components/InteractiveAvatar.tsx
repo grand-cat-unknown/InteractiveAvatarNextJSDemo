@@ -101,9 +101,9 @@ export default function InteractiveAvatar() {
         voice: {
           rate: 1, // 0.5 ~ 1.5
           emotion: VoiceEmotion.FRIENDLY,
-          voiceId:"e6f941fd57e64b3ba000c53263d6ba28"
+          voiceId:"cc29d03937d14240acf109c827a9a51a"
         },
-        language: 'nl',
+        language: 'en',
         disableIdleTimeout: true,
       });
 
@@ -172,6 +172,8 @@ export default function InteractiveAvatar() {
       if (transcript.text) {
         setTranscribedText(transcript.text);
         if (transcript.message_type === 'FinalTranscript') {
+          console.log('Sending transcribed text to avatar');
+          console.log(transcript.text);
           handleTranscribedText(transcript.text);
         }
       }
