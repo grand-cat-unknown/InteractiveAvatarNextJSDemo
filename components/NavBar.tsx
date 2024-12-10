@@ -11,8 +11,8 @@ export default function NavBar() {
           <Image
             src="/flowtribe-png-logo.png"
             alt="FlowTribe Logo"
-            width={50}
-            height={50}
+            width={80}
+            height={80}
           />
         </div>
       </div>
